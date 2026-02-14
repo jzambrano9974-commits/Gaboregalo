@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Pokemon Edicion Especial</title>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
@@ -19,16 +19,18 @@
             overflow: hidden;
         }
 
-        /* MARCO SIMPLE (El que te gustaba) */
+        /* MARCO SIMPLE (Adaptado para escalar) */
         .game-container {
             width: 720px;
             height: 480px;
             background: #000;
-            border: 4px solid #666; /* Borde gris simple */
+            border: 4px solid #666; 
             border-radius: 4px;
             box-shadow: 0 0 40px rgba(0,0,0,0.8);
             position: relative;
             overflow: hidden;
+            /* Esta linea permite que la consola se achique desde el centro en el cel */
+            transform-origin: center center;
         }
 
         .screen {
@@ -64,9 +66,8 @@
             100% { top: 120%; right: 120%; opacity: 0; }
         }
 
-        /* 3. TITULO (FONDO SIMPLE Y FOTO FAMILIAR) */
+        /* 3. TITULO */
         #scene-title {
-            /* Fondo de cuadros verde clasico */
             background-color: #a8e4a0;
             background-image: linear-gradient(45deg, #7dbc74 25%, transparent 25%, transparent 75%, #7dbc74 75%, #7dbc74),
                               linear-gradient(45deg, #7dbc74 25%, transparent 25%, transparent 75%, #7dbc74 75%, #7dbc74);
@@ -81,7 +82,6 @@
         
         .mon { position: absolute; image-rendering: pixelated; }
 
-        /* POSICIONES ORDENADAS */
         .snorlax { width: 130px; left: 50%; transform: translateX(-50%); top: 0px; z-index: 1; }
         .charizard { width: 130px; left: 10px; top: -10px; z-index: 1; transform: scaleX(-1); }
         .gengar { width: 90px; right: 30px; top: 10px; z-index: 1; animation: float 3s infinite ease-in-out; }
@@ -109,7 +109,6 @@
             width: 240px; image-rendering: pixelated; z-index: 5;
         }
 
-        /* CAJA DE TEXTO SIMPLE */
         .dialog-container {
             position: absolute; bottom: 0; left: 0; width: 100%; height: 110px;
             background: #283030; border-top: 4px solid #f8b800;
@@ -125,7 +124,6 @@
             animation: bounce 0.6s infinite; display: none;
         }
 
-        /* OPCIONES */
         #options-menu {
             position: absolute; bottom: 120px; right: 20px;
             background: #fff; border: 3px solid #283030; border-radius: 5px;
@@ -137,7 +135,6 @@
         
         #btn-no { position: relative; transition: all 0.1s ease; }
 
-        /* ANIMACIONES */
         #pokeball {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0);
             width: 50px; image-rendering: pixelated; z-index: 50;
@@ -162,7 +159,7 @@
 </head>
 <body>
 
-    <div class="game-container">
+    <div class="game-container" id="main-container">
         <div class="screen">
 
             <div id="scene-start" class="scene active">
@@ -234,7 +231,25 @@
     <audio id="sfx-caught" src="https://www.myinstants.com/media/sounds/pokemon-caught.mp3"></audio>
 
     <script>
-        // SISTEMA DE AUDIO MANUAL PARA EFECTOS SIMPLES
+        // --- ADAPTACION PARA CELULAR ---
+        function autoResize() {
+            const container = document.getElementById('main-container');
+            const windowWidth = window.innerWidth;
+            const windowHeight = window.innerHeight;
+            
+            // Calculamos la escala segun el ancho de la pantalla
+            if (windowWidth < 720) {
+                const scale = (windowWidth - 20) / 720;
+                container.style.transform = `scale(${scale})`;
+            } else {
+                container.style.transform = `scale(1)`;
+            }
+        }
+
+        window.addEventListener('resize', autoResize);
+        window.addEventListener('load', autoResize);
+
+        // --- SISTEMA DE AUDIO ---
         const AudioContext = window.AudioContext || window.webkitAudioContext;
         const ctx = new AudioContext();
 
@@ -254,7 +269,6 @@
         function sfxSelect() { playTone(600, 'square', 0.1); }
         function sfxNo() { playTone(150, 'sawtooth', 0.2); }
 
-        // VARIABLES
         const scenes = {
             start: document.getElementById('scene-start'),
             gf: document.getElementById('scene-gf'),
@@ -301,7 +315,6 @@
             to.classList.add('active');
         }
 
-        // 1. INICIO
         scenes.start.addEventListener('click', () => {
             ctx.resume(); 
             switchScene(scenes.start, scenes.gf);
@@ -316,7 +329,6 @@
             }, 3000);
         });
 
-        // 2. TÍTULO -> BATALLA
         scenes.title.addEventListener('click', () => {
             sfxSelect();
             audio.bgmPallet.pause();
@@ -329,7 +341,6 @@
             setTimeout(() => typeWriter(script[line]), 1000);
         });
 
-        // TEXTO
         function typeWriter(txt) {
             isTyping = true;
             ui.text.innerHTML = "";
@@ -360,7 +371,6 @@
             }
         });
 
-        // BOTON NO
         ui.btnNo.addEventListener('mouseover', () => {
             sfxNo();
             const x = (Math.random() - 0.5) * 100;
@@ -368,7 +378,6 @@
             ui.btnNo.style.transform = `translate(${x}px, ${y}px)`;
         });
 
-        // BOTON SI
         ui.btnYes.addEventListener('click', () => {
             sfxSelect();
             ui.options.style.display = 'none';
